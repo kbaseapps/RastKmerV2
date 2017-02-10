@@ -1,0 +1,55 @@
+#
+# Define basic display information
+#
+name     : Annotate Gene Functions
+
+tooltip  : |
+    Annotate gene functions using RASTtk kmer-based search v.2.
+
+screenshots :
+    []
+
+icon: kmer-red.png
+
+#
+# Define the set of other narrative methods that should be suggested to the user.
+#
+suggestions :
+    apps:
+        related :
+            []
+        next :
+            []
+    methods:
+        related :
+            []
+        next :
+            []
+
+
+#
+# Configure the display and description of the parameters
+#
+parameters :
+    input_genome :
+        ui-name : |
+            Genome
+        short-hint : |
+            A genome (set of DNA contigs) including structural and functional annotations
+        long-hint  : |
+            A genome (set of DNA contigs) including structural and functional annotations
+            
+    output_genome :
+        ui-name : |
+            Output Genome Name
+        short-hint : |
+            A genome with updated structural and functional annotations
+        long-hint  : |
+            A genome with updated structural and functional annotations
+        placeholder : |
+            Name to assign genome
+
+description : |
+    <p>Annotate gene functions using RASTtk kmer-based search v.2.</p>
+
+publications : []

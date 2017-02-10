@@ -22,7 +22,9 @@ elif [ "${1}" = "init" ] ; then
   wget ftp://ftp.theseed.org/KmerClassification/Data.may1.tgz
   tar -zxvf ./Data.may1.tgz --exclude="Data.may1/kmer.table.mem_map" --exclude="Data.may1/final.kmers"
   mv ./Data.may1 V2Data
-  tar -zxvf ./Data.may1.tgz Data.may1/kmer.table.mem_map -O > ./V2Data/kmer.table.mem_map
+  tar -zxvf ./Data.may1.tgz Data.may1/kmer.table.mem_map -O | gzip > ./V2Data/kmer.table.mem_map.gz
+  echo "empty" > ./V2Data/final.kmers
+  echo "empty" > ./V2Data/kmer.table.mem_map
   mv ./V2Data ./kmer/
   if [ -f /data/kmer/V2Data/kmer.table.mem_map ] ; then
     if [ -f /data/kmer/V2Data/function.index ] ; then
@@ -40,6 +42,7 @@ elif [ "${1}" = "init" ] ; then
       ls -l ./kmer
       ls -l ./kmer/V2Data
   fi
+  cd /kb/module
 elif [ "${1}" = "bash" ] ; then
   bash
 elif [ "${1}" = "report" ] ; then

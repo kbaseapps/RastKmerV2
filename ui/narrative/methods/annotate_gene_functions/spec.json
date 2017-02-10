@@ -1,0 +1,71 @@
+{
+  "ver" : "1.0.0",
+  "name" : "Annotate gene functions",
+  "authors" : [ "rsutormin" ],
+  "contact" : "http://kbase.us/contact-us/",
+  "visble" : true,
+  "categories" : ["active","annotation"],
+  "widgets" : {
+    "input" : null,
+    "output" : "kbaseGenomeView"
+  },
+  "parameters" : [ {
+    "id" : "input_genome",
+    "optional" : false,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : [ "KBaseGenomes.Genome" ]
+    }
+  }, {
+    "id" : "output_genome",
+    "optional" : true,
+    "advanced" : false,
+    "allow_multiple" : false,
+    "default_values" : [ "" ],
+    "field_type" : "text",
+    "text_options" : {
+      "valid_ws_types" : [ "KBaseGenomes.Genome" ],
+      "is_output_name":true
+    }
+  }],
+  "job_id_output_field": "docker",
+  "behavior" : {
+    "service-mapping" : {
+      "url" : "",
+      "name" : "RastKmerV2",
+      "method" : "annotate_genes",
+      "input_mapping" : [
+        {
+          "input_parameter": "input_genome",
+          "target_property": "input_genome_ref",
+          "target_type_transform": "ref"
+        },
+        {
+          "input_parameter": "output_genome",
+          "target_property": "output_genome_name"
+        },
+        {
+          "narrative_system_variable": "workspace",
+          "target_property": "output_workspace"
+        }
+      ],
+      "output_mapping" : [
+        {
+          "narrative_system_variable": "workspace",
+          "target_property": "workspace_name"
+        },
+        {
+          "input_parameter": "output_genome",
+          "target_property": "id"
+        },
+        {
+          "narrative_system_variable": "workspace",
+          "target_property": "ws"
+        }
+      ]
+    }
+  }
+}

@@ -2,6 +2,7 @@
 #BEGIN_HEADER
 import os
 import subprocess
+import sys
 
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -53,38 +54,40 @@ class RastKmerV2:
         # ctx is the context object
         #BEGIN annotate_genes
         ga = GenomeAnnotationAPI(os.environ['SDK_CALLBACK_URL'], token=ctx['token'])
-        genome = ga.get_genome_v1({"genomes": [{"ref": params['input_genome_ref']}],
-                                          "included_fields": ["scientific_name"],
-                                          "included_feature_fields": ["id", "protein_translation",
-                                                                      "type", "function"
-                                                                      ]})["genomes"][0]["data"]
+        genome = ga.get_genome_v1({"genomes": [{"ref": params['input_genome_ref']}]}
+                                  )["genomes"][0]["data"]
         records = []
         for feature_index, feature in enumerate(genome["features"]):
             feature_id = feature["id"]
             sequence = feature.get("protein_translation")
-            record = SeqRecord(Seq(sequence), id=feature_id, description="")
-            records.append(record)
+            if sequence:
+                record = SeqRecord(Seq(sequence), id=feature_id, description="")
+                records.append(record)
         fasta_file = self.scratch + "/proteins.faa"
         SeqIO.write(records, fasta_file, "fasta")
         output_file = self.scratch + '/output.txt'
         with open(fasta_file, "r") as infile:
             with open(output_file, "w") as outfile:
-                p = subprocess.Popen(["kmer_search", ""], 
-                                 cwd=self.scratch, stdin=infile, stdout=outfile)
+                p = subprocess.Popen("kmer_search -m 5 -g 200 -d /data/kmer/V2Data -a",
+                                     shell=True, cwd=self.scratch, stdin=infile, 
+                                     stdout=outfile, stderr=sys.stderr.fileno())
                 p.wait()
         fid_to_finc = {}
         with open(output_file, "r") as infile:
             for line in infile:
-                fid, func, hits, hitsW = line.split("\t")
-                print("fid=" + fid + ", function=" + func + ", hits=" + hits + ", hitsW=" + hitsW)
+                parts = line.rstrip().split("\t")
+                fid = parts[0]
+                func = parts[1]
+                print("Function prediction for feature id=" + fid + ": " + func)
                 fid_to_finc[fid] = func
         for feature_index, feature in enumerate(genome["features"]):
             feature_id = feature["id"]
             if feature_id in fid_to_finc:
                 feature['function'] = fid_to_finc[feature_id]
+        prov = ctx.provenance()
         info = ga.save_one_genome_v1({'workspace': params['output_workspace'], 
                                       'name': params['output_genome_name'],
-                                      'data': genome})['info']
+                                      'data': genome, 'provenance': prov})['info']
         genome_ref = str(info[6]) + '/' + str(info[0]) + '/' + str(info[4])
         print("Genome saved to " + genome_ref)
         #END annotate_genes

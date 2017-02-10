@@ -643,7 +643,8 @@ public class KmerGutsJava {
                 pw = new PrintWriter(System.out);
                 stdout = true;
             }
-            instance.run(new File(kmerTableDir), new File(queryFastaFile), pw, stdout);
+            instance.run(new File(kmerTableDir), queryFastaFile == null ? null : 
+                    new File(queryFastaFile), pw, stdout);
             pw.flush();
         } finally {
             if (outputFile != null) {

@@ -6,6 +6,7 @@ import time
 import requests
 
 from os import environ
+import shutil
 try:
     from ConfigParser import ConfigParser  # py2
 except:
@@ -16,6 +17,8 @@ from pprint import pprint  # noqa: F401
 from biokbase.workspace.client import Workspace as workspaceService
 from RastKmerV2.RastKmerV2Impl import RastKmerV2
 from RastKmerV2.RastKmerV2Server import MethodContext
+
+from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
 
 
 class RastKmerV2Test(unittest.TestCase):
@@ -72,14 +75,16 @@ class RastKmerV2Test(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+    def test_annotate_genes(self):
+        gbk_file = "/kb/module/test/data/kb_g.399.c.1.gbk.gz"
+        temp_gbk = "/kb/module/work/tmp/kb_g.399.c.1.gbk.gz"
+        shutil.copy(gbk_file, temp_gbk)
+        genome_obj = "Genome.1"
+        gfu = GenomeFileUtil(os.environ['SDK_CALLBACK_URL'], token=self.getContext()['token'])
+        gfu.genbank_to_genome({'file': {'path': temp_gbk}, 'workspace_name': self.getWsName(),
+                               'genome_name': genome_obj})
+        genome_ref = self.getWsName() + '/' + genome_obj
+        self.getImpl().annotate_genes(self.getContext(), {'input_genome_ref': genome_ref,
+                                                          'output_workspace': self.getWsName(),
+                                                          'output_genome_name': genome_obj})
+        # kmer_guts -m 5 -g 200 -D /data/kmer/V2Data/ -a | km_process_hits_to_regions -a -d /data/kmer/V2Data/  | km_pick_best_hit_in_peg
